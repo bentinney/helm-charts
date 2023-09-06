@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: relay
+  labels:
+    app: relay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: relay
+  template:
+    metadata:
+      labels:
+        app: relay
+    spec:
+      initContainers:
+      - name: relay-init
+        image: "{{required ".Values.global.dockerHubMirror is missing" .Values.global.dockerHubMirror }}/{{ required ".Values.image.relay.repository is missing" .Values.image.relay.repository }}:{{ required ".Values.image.relay.tag is missing" .Values.image.relay.tag }}"
+        imagePullPolicy: {{ .Values.image.relay.pullPolicy }}
+        args:
+          - "credentials"
+          - "generate"
+        env:
+          - name: RELAY_PORT
+            value: "3000"
+          - name: REDIS_HOST
+            value: {{ template "redis.fullname" . }}
+          - name: REDIS_PORT
+            value: "6379"
+          - name: REDIS_PASSWORD
+            valueFrom: { secretKeyRef: { name: {{ template "redis.fullname" . }}, key: redis-password } }
+        volumeMounts:
+          - name: credentials
+            mountPath: /work/.relay
+          - name: config
+            mountPath: /work/.relay/config.yml
+            subPath: config.yml
+            readOnly: true
+          - name: config
+            mountPath: /work/.relay/projects/12.json
+            subPath: 12.json
+            readOnly: true
+          - name: config
+            mountPath: /work/.relay/projects/10.json
+            subPath: 10.json
+            readOnly: true          
+      containers:
+      - name: relay
+        image: "{{required ".Values.global.dockerHubMirror is missing" .Values.global.dockerHubMirror }}/{{ required ".Values.image.relay.repository is missing" .Values.image.relay.repository }}:{{ required ".Values.image.relay.tag is missing" .Values.image.relay.tag }}"
+        imagePullPolicy: {{ .Values.image.relay.pullPolicy }}
+        env:
+          - name: RELAY_PORT
+            value: "3000"
+          - name: REDIS_HOST
+            value: {{ template "redis.fullname" . }}
+          - name: REDIS_PORT
+            value: "6379"
+          - name: REDIS_PASSWORD
+            valueFrom: { secretKeyRef: { name: {{ template "redis.fullname" . }}, key: redis-password } }
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+          - name: credentials
+            mountPath: /work/.relay
+          - name: config
+            mountPath: /work/.relay/config.yml
+            subPath: config.yml
+            readOnly: true
+          - name: config
+            mountPath: /work/.relay/projects/12.json
+            subPath: 12.json
+            readOnly: true
+          - name: config
+            mountPath: /work/.relay/projects/10.json
+            subPath: 10.json
+            readOnly: true
+          {{- if .Values.geodata.volumeName }}
+          - name: {{ .Values.geodata.volumeName }}
+            mountPath: {{ .Values.geodata.mountPath }}
+          {{- end }}
+      volumes:
+      - name: config
+        configMap:
+          name: relay
+          defaultMode: 0644
+      - name: credentials
+        emptyDir: {}
+      - name: geoip
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: relay
+spec:
+  selector:
+    app: relay
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000

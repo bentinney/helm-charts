@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: symbolicator
+  labels:
+    app: symbolicator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: symbolicator
+  template:
+    metadata:
+      labels:
+        app: symbolicator
+    spec:
+      containers:
+      - name: symbolicator
+        image: "{{required ".Values.global.dockerHubMirror is missing" .Values.global.dockerHubMirror }}/{{ required ".Values.image.symbolicator.repository is missing" .Values.image.symbolicator.repository }}:{{ required ".Values.image.symbolicator.tag is missing" .Values.image.symbolicator.tag }}"
+        imagePullPolicy: {{ .Values.image.symbolicator.pullPolicy }}
+        args: ["run"]
+        ports:
+        - containerPort: 3021
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: symbolicator
+spec:
+  selector:
+    app: symbolicator
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 3021
+    targetPort: 3021
