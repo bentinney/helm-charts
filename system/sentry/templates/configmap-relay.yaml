@@ -7,7 +7,7 @@ metadata:
 data:
   config.yml: |-
     relay:
-      mode: static
+      mode: proxy
       upstream: "https://{{ .Values.ingress.host}}/"
       host: 0.0.0.0
       port: 3000
@@ -19,29 +19,3 @@ data:
         - name: "message.max.bytes"
           value: 50000000  # 50MB or bust
       redis: "redis://:{{ .Values.redis.redisPassword}}@{{ template "redis.fullname" . }}:6379"
-  12.json: |
-    {
-      "slug": "barbican",
-      "publicKeys": [
-        {
-          "publicKey": "ef7725705363484195a6c51c29d12d3b",
-          "isEnabled": true
-        }
-      ],
-      "config": {
-        "allowedDomains": ["*"]
-      }
-    }
-  10.json: |
-    {
-      "slug": "blackbox",
-      "publicKeys": [
-        {
-          "publicKey": "e8d0e18f32fc4ba6bf577efbfce57949",
-          "isEnabled": true
-        }
-      ],
-      "config": {
-        "allowedDomains": ["*"]
-      }
-    }

@@ -23,7 +23,7 @@ spec:
       initContainers:
       - name: "upgrade"
         image: "{{required ".Values.global.registry is missing" .Values.global.registry }}/{{ .Values.image.sentry.repository }}:{{required ".Values.image.sentry.tag is missing" .Values.image.sentry.tag }}"
-        args: ["upgrade", "--noinput", "--lock"]
+        args: ["upgrade", "--noinput"]
         env:
 {{ include "env-vars" . | indent  10 }}
       {{- end }}

@@ -41,7 +41,7 @@ image:
     pullPolicy: IfNotPresent
   symbolicator:
     repository: getsentry/symbolicator
-    tag: 21.5.0
+    tag: nightly
     pullPolicy: IfNotPresent
   clickhouse:
     repository: yandex/clickhouse-server
