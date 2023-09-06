@@ -62,3 +62,28 @@
   value: {{ $val | squote }}
 {{- end }}
 {{ end }}
+- name: SNUBA
+  value: 'http://snuba-api:1218'
+- name: SNUBA_SETTINGS
+  value: docker
+- name: CLICKHOUSE_HOST
+  value: clickhouse
+- name: CLICKHOUSE_PORT
+  value: "9000"
+- name: DEFAULT_BROKERS
+  value: sentry-kafka:9092
+{{- if .Values.geodata.path }}
+- name: GEOIP_PATH_MMDB
+  value: {{ .Values.geodata.path | quote }}
+{{- end }}
+- name: SENTRY_URL_PREFIX
+  value: {{ .Values.sentryURL | squote }}
+- name: RELAY_PORT
+  value: "3000"
+- name: REDIS_HOST
+  value: {{ template "redis.fullname" . }}
+- name: REDIS_PORT
+  value: "6379"
+- name: REDIS_PASSWORD
+  valueFrom: { secretKeyRef: { name: {{ template "redis.fullname" . }}, key: redis-password } }
+{{ end }}

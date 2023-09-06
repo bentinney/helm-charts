@@ -10,6 +10,7 @@ metadata:
     prometheus.io/probe_path: /_health/?full
     kubernetes.io/tls-acme: "true"
     disco: "true"
+    ingress.kubernetes.io/use-regex: "true"
   {{- end}}
 spec:
   {{- if or .Values.ingress.tls_crt .Values.ingress.tls}}
@@ -28,4 +29,25 @@ spec:
             name: {{ template "fullname" . }}
             port:
               number: {{ .Values.service.externalPort }}
+      - path: /api/[1-9]\d*/
+        pathType: Prefix
+        backend:
+          service:
+            name: relay
+            port:
+              number: 3000
+      - path: /api/store/
+        pathType: Prefix
+        backend:
+          service:
+            name: relay
+            port:
+              number: 3000
+      - path: /api/store/2/*
+        pathType: Prefix
+        backend:
+          service:
+            name: relay
+            port:
+              number: 3000
 {{- end }}

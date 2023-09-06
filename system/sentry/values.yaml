@@ -27,9 +27,39 @@ workerReplicaCount: 1
 organizationName: Monsoon
 organizationSlug: monsoon
 image:
-  repository: sentry
-  tag: 9.1.2-r4
-  pullPolicy: IfNotPresent
+  sentry:
+    repository: sentry
+    tag: 21.5.0
+    pullPolicy: IfNotPresent
+  snuba:
+    repository: getsentry/snuba
+    tag: 21.5.0
+    pullPolicy: IfNotPresent
+  relay:
+    repository: getsentry/relay
+    tag: 21.5.0
+    pullPolicy: IfNotPresent
+  symbolicator:
+    repository: getsentry/symbolicator
+    tag: 21.5.0
+    pullPolicy: IfNotPresent
+  clickhouse:
+    repository: yandex/clickhouse-server
+    tag: 20.3.9.70
+    pullPolicy: IfNotPresent
+  kafka:
+    repository: confluentinc/cp-kafka
+    tag: 5.5.0
+    pullPolicy: IfNotPresent
+  zookeeper:
+    repository: confluentinc/cp-zookeeper
+    tag: 5.5.0
+    pullPolicy: IfNotPresent
+  void:
+    repository: alpine
+    tag: v20201119181236-v3.9
+    pullPolicy: IfNotPresent
+
 service:
   name: sentry
   type: ClusterIP
@@ -160,3 +190,20 @@ databaseUpgrade:
 secretIngress:
   tls_crt:
     enabled: false
+
+kafka:
+  enabled: true
+  service:
+    ports:
+      client: 9092
+
+externalKafka:
+  ## Hostname or ip address of external kafka
+  ##
+  # host: "kafka-confluent"
+  port: 9092
+
+geodata:
+  path: /geoip/GeoLite2-City.mmdb
+  volumeName: geoip
+  mountPath: /geodata
