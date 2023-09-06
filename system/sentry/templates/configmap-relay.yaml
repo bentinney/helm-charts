@@ -7,7 +7,7 @@ metadata:
 data:
   config.yml: |-
     relay:
-      mode: proxy
+      mode: managed
       upstream: "https://{{ .Values.ingress.host}}/"
       host: 0.0.0.0
       port: 3000
