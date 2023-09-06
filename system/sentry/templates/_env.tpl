@@ -61,7 +61,6 @@
 - name: {{ $key | squote }}
   value: {{ $val | squote }}
 {{- end }}
-{{ end }}
 - name: SNUBA
   value: 'http://snuba-api:1218'
 - name: SNUBA_SETTINGS
