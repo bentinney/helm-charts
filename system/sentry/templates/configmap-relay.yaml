@@ -11,11 +11,19 @@ data:
       upstream: "https://{{ .Values.ingress.host}}/"
       host: 0.0.0.0
       port: 3000
-    processing:
-      enabled: true
+
+    # processing:
+    #   enabled: false
+    #   {{- if .Values.geodata.path }}
+    #   geoip_path: {{ .Values.geodata.path | quote }}
+    #   {{- end }}
+
       kafka_config:
         - name: "bootstrap.servers"
           value: {{ (include "sentry.kafka.bootstrap_servers_string" .) | quote }}
         - name: "message.max.bytes"
           value: 50000000  # 50MB or bust
       redis: "redis://:{{ .Values.redis.redisPassword}}@{{ template "redis.fullname" . }}:6379"
+      topics:
+        metrics_transactions: ingest-performance-metrics
+        metrics_sessions: ingest-metrics
