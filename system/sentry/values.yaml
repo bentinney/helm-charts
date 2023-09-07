@@ -29,15 +29,15 @@ organizationSlug: monsoon
 image:
   sentry:
     repository: sentry
-    tag: 21.5.0
+    tag: 23.6.2
     pullPolicy: IfNotPresent
   snuba:
     repository: getsentry/snuba
-    tag: 21.5.0
+    tag: 23.6.2
     pullPolicy: IfNotPresent
   relay:
     repository: getsentry/relay
-    tag: 21.5.0
+    tag: 23.6.2
     pullPolicy: IfNotPresent
   symbolicator:
     repository: getsentry/symbolicator
@@ -45,15 +45,15 @@ image:
     pullPolicy: IfNotPresent
   clickhouse:
     repository: yandex/clickhouse-server
-    tag: 20.3.9.70
+    tag: 21.3.20
     pullPolicy: IfNotPresent
   kafka:
     repository: confluentinc/cp-kafka
-    tag: 5.5.0
+    tag: 5.5.7
     pullPolicy: IfNotPresent
   zookeeper:
     repository: confluentinc/cp-zookeeper
-    tag: 5.5.0
+    tag: 5.5.7
     pullPolicy: IfNotPresent
   void:
     repository: alpine
@@ -83,6 +83,14 @@ ingress:
 
 rbac:
   create: true
+
+memcached:
+  memoryLimit: "2048"
+  args:
+    - "memcached"
+    - "-u memcached"
+  alerts:
+    support_group: identity
 
 operator:
   #sentryEndpoint: https://sentry.$region.cloud.sap/api/0/
