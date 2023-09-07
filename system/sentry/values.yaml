@@ -29,15 +29,15 @@ organizationSlug: monsoon
 image:
   sentry:
     repository: sentry
-    tag: 23.6.2
+    tag: 21.5.0
     pullPolicy: IfNotPresent
   snuba:
     repository: getsentry/snuba
-    tag: 23.6.2
+    tag: 21.5.0
     pullPolicy: IfNotPresent
   relay:
     repository: getsentry/relay
-    tag: 23.6.2
+    tag: 21.5.0
     pullPolicy: IfNotPresent
   symbolicator:
     repository: getsentry/symbolicator
@@ -192,7 +192,7 @@ probe:
 
 # enable when Sentry version is upgraded, also validate if GEOIP_PATH_MMDB is configured.
 databaseUpgrade:
-  enabled: false
+  enabled: true
 
 # sentry-sentry-tls is used, keeping the config for future reference.
 secretIngress:
