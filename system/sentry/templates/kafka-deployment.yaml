@@ -43,6 +43,13 @@ spec:
           value: "6379"
         - name: REDIS_PASSWORD
           valueFrom: { secretKeyRef: { name: {{ template "redis.fullname" . }}, key: redis-password } }
+        volumeMounts:
+        - name: kafka-topics-volume
+          mountPath: /scripts
+      volumes:
+      - name: kafka-topics-volume
+        configMap:
+          name: kafka-scripts
 ---
 apiVersion: v1
 kind: Service

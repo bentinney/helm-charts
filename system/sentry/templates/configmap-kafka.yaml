@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-scripts
+data:
+  kafka-topics.sh: |
+    #!/bin/bash
+    kafka-topics --create --topic ingest-replay-recordings --bootstrap-server localhost:9092
+    kafka-topics --create --topic profiles --bootstrap-server localhost:9092
+    kafka-topics --create --topic ingest-occurrences --bootstrap-server localhost:9092
+    kafka-topics --create --topic ingest-metrics --bootstrap-server localhost:9092
+    kafka-topics --create --topic ingest-performance-metrics --bootstrap-server localhost:9092
