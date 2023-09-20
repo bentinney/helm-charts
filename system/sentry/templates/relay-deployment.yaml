@@ -37,14 +37,6 @@ spec:
             mountPath: /work/.relay/config.yml
             subPath: config.yml
             readOnly: true
-          - name: config
-            mountPath: /work/.relay/projects/12.json
-            subPath: 12.json
-            readOnly: true
-          - name: config
-            mountPath: /work/.relay/projects/10.json
-            subPath: 10.json
-            readOnly: true          
       containers:
       - name: relay
         image: "{{required ".Values.global.dockerHubMirror is missing" .Values.global.dockerHubMirror }}/{{ required ".Values.image.relay.repository is missing" .Values.image.relay.repository }}:{{ required ".Values.image.relay.tag is missing" .Values.image.relay.tag }}"
@@ -67,18 +59,17 @@ spec:
             mountPath: /work/.relay/config.yml
             subPath: config.yml
             readOnly: true
-          - name: config
-            mountPath: /work/.relay/projects/12.json
-            subPath: 12.json
-            readOnly: true
-          - name: config
-            mountPath: /work/.relay/projects/10.json
-            subPath: 10.json
-            readOnly: true
-          {{- if .Values.geodata.volumeName }}
+          {{- if .Values.geodata.enabled }}
           - name: {{ .Values.geodata.volumeName }}
             mountPath: {{ .Values.geodata.mountPath }}
           {{- end }}
+        resources:
+          requests:
+            cpu: {{ .Values.sentry.resources.requests.cpu | quote }}
+            memory: {{ .Values.sentry.resources.requests.memory | quote }}
+          limits:
+            cpu: {{ .Values.sentry.resources.limits.cpu | quote }}
+            memory: {{ .Values.sentry.resources.limits.memory | quote }}
       volumes:
       - name: config
         configMap:
@@ -86,8 +77,10 @@ spec:
           defaultMode: 0644
       - name: credentials
         emptyDir: {}
+      {{- if .Values.geodata.enabled }}
       - name: geoip
         emptyDir: {}
+      {{- end }}
 ---
 apiVersion: v1
 kind: Service
