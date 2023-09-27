@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snuba-replacer
+  labels:
+    app: snuba-replacer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snuba-replacer
+  template:
+    metadata:
+      labels:
+        app: snuba-replacer
+    spec:
+      containers:
+      - name: snuba-replacer
+        image: "{{required ".Values.global.dockerHubMirror is missing" .Values.global.dockerHubMirror }}/{{ required ".Values.image.snuba.repository is missing" .Values.image.snuba.repository }}:{{ required ".Values.image.snuba.tag is missing" .Values.image.snuba.tag }}"
+        imagePullPolicy: {{ .Values.image.snuba.pullPolicy }}
+        args: ["replacer", "--storage", "errors", "--auto-offset-reset", "latest", "--max-batch-size","3"]
+        ports:
+        - containerPort: 1218
+        env:
+        - name: SNUBA_SETTINGS
+          value: docker
+        - name: CLICKHOUSE_HOST
+          value: clickhouse
+        - name: CLICKHOUSE_PORT
+          value: "9000"
+        - name: DEFAULT_BROKERS
+          value: sentry-kafka:9092
+        - name: REDIS_HOST
+          value: {{ template "redis.fullname" . }}
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_PASSWORD
+          valueFrom: { secretKeyRef: { name: {{ template "redis.fullname" . }}, key: redis-password } }

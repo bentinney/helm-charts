@@ -1,29 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-cron
+  name: {{ template "fullname" . }}-post-process-forward
   labels:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ template "fullname" . }}-cron
+      app: {{ template "fullname" . }}-post-process-forward
   template:
     metadata:
       labels:
-        app: {{ template "fullname" . }}-cron
+        app: {{ template "fullname" . }}-post-process-forward
         alert-tier: os
         alert-service: sentry
     spec:
-      {{- if .Values.serviceAccount.enabled }}
-      serviceAccountName: {{ .Values.serviceAccount.name }}
-      {{- end }}
       containers:
-      - name: {{ .Chart.Name }}
-        image: "{{required ".Values.global.registry is missing" .Values.global.registry }}/{{ .Values.image.sentry.repository }}:{{required ".Values.image.sentry.tag is missing" .Values.image.sentry.tag }}"
+      - name: {{ .Chart.Name }}-post-process-forward
+        image: "{{required ".Values.global.registry is missing" .Values.global.registry }}/{{ .Values.image.sentry.repository }}:{{required ".Values.image.tag is missing" .Values.image.sentry.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        args: [ run, cron ]
+        command: ["sentry", "run", "post-process-forwarder", "--commit-batch-size", "{{ default "1" .Values.sentry.postProcessForward.commitBatchSize }}"]
         env:
 {{ include "env-vars" . | indent  10 }}
         resources:

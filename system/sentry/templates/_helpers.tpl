@@ -61,3 +61,102 @@ Set Kafka bootstrap servers string
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "sentry.clickhouse.fullname" -}}
+{{- printf "%s-%s" .Release.Name "clickhouse" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "snuba.port" -}}1218{{- end -}}
+{{- define "relay.port" -}}3000{{- end -}}
+{{- define "symbolicator.port" -}}3021{{- end -}}
+
+{{/*
+Set ClickHouse host
+*/}}
+{{- define "sentry.clickhouse.host" -}}
+{{- if .Values.clickhouse.enabled -}}
+{{- template "sentry.clickhouse.fullname" . -}}
+{{- else -}}
+{{ required "A valid .Values.externalClickhouse.host is required" .Values.externalClickhouse.host }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set ClickHouse port
+*/}}
+{{- define "sentry.clickhouse.port" -}}
+{{- if .Values.clickhouse.enabled -}}
+{{- default 9000 .Values.clickhouse.clickhouse.tcp_port }}
+{{- else -}}
+{{ required "A valid .Values.externalClickhouse.tcpPort is required" .Values.externalClickhouse.tcpPort }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set ClickHouse HTTP port
+*/}}
+{{- define "sentry.clickhouse.http_port" -}}
+{{- if .Values.clickhouse.enabled -}}
+{{- default 8123 .Values.clickhouse.clickhouse.http_port }}
+{{- else -}}
+{{ required "A valid .Values.externalClickhouse.httpPort is required" .Values.externalClickhouse.httpPort }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set ClickHouse Database
+*/}}
+{{- define "sentry.clickhouse.database" -}}
+{{- if .Values.clickhouse.enabled -}}
+default
+{{- else -}}
+{{ required "A valid .Values.externalClickhouse.database is required" .Values.externalClickhouse.database }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set ClickHouse Authorization
+*/}}
+{{- define "sentry.clickhouse.auth" -}}
+--user {{ include "sentry.clickhouse.username" . }} --password {{ include "sentry.clickhouse.password" .| quote }}
+{{- end -}}
+
+{{/*
+Set ClickHouse User
+*/}}
+{{- define "sentry.clickhouse.username" -}}
+{{- if .Values.clickhouse.enabled -}}
+  {{- if .Values.clickhouse.clickhouse.configmap.users.enabled -}}
+{{ (index .Values.clickhouse.clickhouse.configmap.users.user 0).name }}
+  {{- else -}}
+default
+  {{- end -}}
+{{- else -}}
+{{ required "A valid .Values.externalClickhouse.username is required" .Values.externalClickhouse.username }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set ClickHouse Password
+*/}}
+{{- define "sentry.clickhouse.password" -}}
+{{- if .Values.clickhouse.enabled -}}
+  {{- if .Values.clickhouse.clickhouse.configmap.users.enabled -}}
+{{ (index .Values.clickhouse.clickhouse.configmap.users.user 0).config.password }}
+  {{- else -}}
+  {{- end -}}
+{{- else -}}
+{{ .Values.externalClickhouse.password }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set ClickHouse cluster name
+*/}}
+{{- define "sentry.clickhouse.cluster.name" -}}
+{{- if .Values.clickhouse.enabled -}}
+{{ .Release.Name | printf "%s-clickhouse" }}
+{{- else -}}
+{{ required "A valid .Values.externalClickhouse.clusterName is required" .Values.externalClickhouse.clusterName }}
+{{- end -}}
+{{- end -}}

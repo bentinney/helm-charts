@@ -50,16 +50,3 @@ spec:
       - name: kafka-topics-volume
         configMap:
           name: kafka-scripts
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: sentry-kafka
-spec:
-  selector:
-    app: kafka
-  type: ClusterIP
-  ports:
-  - protocol: TCP
-    port: 9092
-    targetPort: 9092

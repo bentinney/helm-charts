@@ -1,26 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: snuba-consumer
+  name: snuba-api
   labels:
-    app: snuba-consumer
+    app: snuba-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: snuba-consumer
+      app: snuba-api
   template:
     metadata:
       labels:
-        app: snuba-consumer
+        app: snuba-api
     spec:
       containers:
-      - name: snuba-consumer
+      - name: snuba-api
         image: "{{required ".Values.global.dockerHubMirror is missing" .Values.global.dockerHubMirror }}/{{ required ".Values.image.snuba.repository is missing" .Values.image.snuba.repository }}:{{ required ".Values.image.snuba.tag is missing" .Values.image.snuba.tag }}"
         imagePullPolicy: {{ .Values.image.snuba.pullPolicy }}
         ports:
         - containerPort: 1218
-        args: ["consumer", "--storage", "errors", "--auto-offset-reset", "latest", "--max-batch-time-ms", "750"]
         env:
         - name: SNUBA_SETTINGS
           value: docker
@@ -36,16 +35,23 @@ spec:
           value: "6379"
         - name: REDIS_PASSWORD
           valueFrom: { secretKeyRef: { name: {{ template "redis.fullname" . }}, key: redis-password } }
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: snuba-consumer
-spec:
-  selector:
-    app: snuba-consumer
-  type: ClusterIP
-  ports:
-  - protocol: TCP
-    port: 1218
-    targetPort: 1218
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /
+            port: {{ template "snuba.port" }}
+            scheme: HTTP
+          initialDelaySeconds: {{ .Values.snuba.api.probeInitialDelaySeconds }}
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /
+            port: {{ template "snuba.port" }}
+            scheme: HTTP
+          initialDelaySeconds: {{ .Values.snuba.api.probeInitialDelaySeconds }}
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2

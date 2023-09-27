@@ -59,6 +59,26 @@ spec:
             mountPath: /work/.relay/config.yml
             subPath: config.yml
             readOnly: true
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /api/relay/healthcheck/ready/
+            port: {{ template "relay.port" }}
+            scheme: HTTP
+          initialDelaySeconds: {{ .Values.relay.probeInitialDelaySeconds }}
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /api/relay/healthcheck/ready/
+            port: {{ template "relay.port" }}
+            scheme: HTTP
+          initialDelaySeconds: {{ .Values.relay.probeInitialDelaySeconds }}
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
           {{- if .Values.geodata.enabled }}
           - name: {{ .Values.geodata.volumeName }}
             mountPath: {{ .Values.geodata.mountPath }}
@@ -81,16 +101,3 @@ spec:
       - name: geoip
         emptyDir: {}
       {{- end }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: relay
-spec:
-  selector:
-    app: relay
-  type: ClusterIP
-  ports:
-  - protocol: TCP
-    port: 3000
-    targetPort: 3000

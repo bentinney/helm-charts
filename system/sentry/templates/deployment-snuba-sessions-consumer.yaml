@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: snuba-replacer
+  name: snuba-sessions-consumer
   labels:
-    app: snuba-replacer
+    app: snuba-sessions-consumer
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: snuba-replacer
+      app: snuba-sessions-consumer
   template:
     metadata:
       labels:
-        app: snuba-replacer
+        app: snuba-sessions-consumer
     spec:
       containers:
-      - name: snuba-replacer
+      - name: snuba-sessions-consumer
         image: "{{required ".Values.global.dockerHubMirror is missing" .Values.global.dockerHubMirror }}/{{ required ".Values.image.snuba.repository is missing" .Values.image.snuba.repository }}:{{ required ".Values.image.snuba.tag is missing" .Values.image.snuba.tag }}"
         imagePullPolicy: {{ .Values.image.snuba.pullPolicy }}
-        args: ["replacer", "--storage", "errors", "--auto-offset-reset", "latest", "--max-batch-size","3"]
         ports:
         - containerPort: 1218
+        args: ["snuba", "consumer", "--storage", "sessions_raw", "--auto-offset-reset=latest", "--max-batch-time-ms", "750"]
         env:
         - name: SNUBA_SETTINGS
           value: docker
@@ -36,16 +36,3 @@ spec:
           value: "6379"
         - name: REDIS_PASSWORD
           valueFrom: { secretKeyRef: { name: {{ template "redis.fullname" . }}, key: redis-password } }
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: snuba-replacer
-spec:
-  selector:
-    app: snuba-replacer
-  type: ClusterIP
-  ports:
-  - protocol: TCP
-    port: 1218
-    targetPort: 1218
